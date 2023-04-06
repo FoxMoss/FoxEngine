@@ -1,102 +1,91 @@
 /*******************************************************************************************
- *
- *   raylib [core] example - Basic 3d example
- *
- *   Welcome to raylib!
- *
- *   To compile example, just press F5.
- *   Note that compiled executable is placed in the same folder as .c file
- *
- *   You can find all basic examples on C:\raylib\raylib\examples folder or
- *   raylib official webpage: www.raylib.com
- *
- *   Enjoy using raylib. :)
- *
- *   This example has been created using raylib 1.0 (www.raylib.com)
- *   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
- *
- *   Copyright (c) 2013-2023 Ramon Santamaria (@raysan5)
- *
- ********************************************************************************************/
+*
+*   raylib [core] example - Basic window
+*
+*   Welcome to raylib!
+*
+*   To test examples, just press F6 and execute raylib_compile_execute script
+*   Note that compiled executable is placed in the same folder as .c file
+*
+*   You can find all basic examples on C:\raylib\raylib\examples folder or
+*   raylib official webpage: www.raylib.com
+*
+*   Enjoy using raylib. :)
+*
+*   Example originally created with raylib 1.0, last time updated with raylib 1.0
+*
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2013-2023 Ramon Santamaria (@raysan5)
+*
+********************************************************************************************/
 
 #include "raylib.h"
 #include "camera.h"
 
-#if defined(PLATFORM_WEB)
-#include <emscripten/emscripten.h>
-#endif
-
-#define POINTS_AMMOUNT 8
-
-static void UpdateDrawFrame(void);
 
 FoxCamera camera;
-Vector3 points[POINTS_AMMOUNT] = {
-    {0, 0, 0},
-    {1, 0, 0},
-    {1, 1, 0},
-    {0, 1, 0},
-    {0, 0, 1},
-    {1, 0, 1},
-    {1, 1, 1},
-    {0, 1, 1}};
 
-int main()
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+int main(void)
 {
+    // Initialization
+    //--------------------------------------------------------------------------------------
     NewFoxCamera(&camera);
     const int screenWidth = 450;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "[Fox Engine]");
+    InitWindow(screenWidth, screenHeight, "[foxmoss]");
 
-#if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
-#else
-    SetTargetFPS(60);
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose())
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        UpdateDrawFrame();
-    }
-#endif
+        // Update
+        //----------------------------------------------------------------------------------
+        // TODO: Update your variables here
+        //----------------------------------------------------------------------------------
 
-    CloseWindow();
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+            ClearBackground(BLACK);
+
+            if(IsKeyDown(KEY_UP))
+            {
+                camera.position.y++;
+            }
+            if(IsKeyDown(KEY_DOWN))
+            {
+                camera.position.y--;
+            }
+            if(IsKeyDown(KEY_S))
+            {
+                camera.position.z--;
+            }
+            if(IsKeyDown(KEY_W))
+            {
+                camera.position.z++;
+            }
+
+            render(camera);
+
+            DrawFPS(10,10);
+
+        EndDrawing();
+        //----------------------------------------------------------------------------------
+    }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 
     return 0;
-}
-
-// Update and draw game frame
-static void UpdateDrawFrame(void)
-{
-    BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-
-
-    render(camera);
-
-    if(IsKeyPressed(KEY_UP))
-    {
-        camera.position.y++;
-    }
-
-    if(IsKeyPressed(KEY_DOWN))
-    {
-        camera.position.y--;
-    }
-    if(IsKeyPressed(KEY_W))
-    {
-        camera.position.z++;
-    }
-
-    if(IsKeyPressed(KEY_S))
-    {
-        camera.position.z--;
-    }
-
-    DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
-
-    DrawFPS(10, 10);
-
-    EndDrawing();
 }
