@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "foxmath.h"
+#include <pthread.h>
 
 #define MAXSTEPS 20
 #define WIDTH 450
@@ -22,7 +23,7 @@ typedef struct FoxCamera
     float angle;
 } FoxCamera;
 
-void NewFoxCamera (FoxCamera* this)
+void NewFoxCamera(FoxCamera *this)
 {
     this->position = (Vector3){0, 0, 0};
     this->rotation = (Vector3){0, 0, 0};
@@ -34,38 +35,98 @@ void NewFoxCamera (FoxCamera* this)
     // this->*framebuffer = malloc(camera.width * camera.height * sizeof(Vector3));
 }
 
-Vector3 objects[1] = {(Vector3){0,-1,10}};
+Vector3 objects[1] = {(Vector3){0, 0, 10}};
 
 float smallestDist(Vector3 point)
 {
     float smallest = INFINITY;
     for (int i = 0; i < 1; i++)
     {
-        
+
         smallest = fminf(smallest, sphereSDF(point, objects[i], 1));
-        //smallest = fminf(smallest, planeSDF(point, objects[i].y));
-        //smallest = fminf(smallest, boxcheapSDF(point, objects[i], (Vector3) {1,1,1}));
+        // smallest = fminf(smallest, planeSDF(point, objects[i].y));
+        //  smallest = fminf(smallest, boxcheapSDF(point, objects[i], (Vector3) {1,1,1}));
     }
-    
+
     return smallest;
+}
+typedef struct traceParam
+{
+    int x;
+    int y;
+    FoxCamera camera;
+} traceParam;
+void *traceRay(void *parm)
+{
+    traceParam *param = (traceParam *)parm;
+    int x = param->x;
+    int y = param->y;
+    FoxCamera camera = param->camera;
+
+    float xx = 0;
+    float yy = 0;
+
+    Color color = BLACK;
+
+    xx = (2 * ((x + 0.5) * camera.invWidth) - 1) * camera.angle * camera.aspectratio;
+    yy = (1 - 2 * ((y + 0.5) * camera.invHeight)) * camera.angle;
+    color = WHITE;
+
+    Vector3 raydir = {xx, yy, 1};
+    normalize(&raydir);
+
+    float dist = 0;
+
+    int steps = 20;
+
+    if (IsKeyDown(KEY_R))
+    {
+        steps = 50;
+    }
+
+    for (int k = 0; k < steps; ++k)
+    {
+        float distAdd = smallestDist(addVec3(mulVec3(raydir, dist), camera.position));
+        // printf("dist: %f\n point: (x: %f, y: %f, z: %f)", smallestDist, mulVec3(raydir, dist).x, mulVec3(raydir, dist).y, mulVec3(raydir, dist).z);
+
+        // printf("%f\n",distAdd);
+
+        dist += distAdd;
+        if (distAdd < 2)
+        {
+
+            Vector3 pos = absVec3(mulVec3(raydir, dist));
+            // color = (Color){pos.z * 10, pos.x * 20, pos.y * 10, 255};
+            printf("%f\n", distAdd);
+            DrawPixel(x, y, color);
+            break;
+        }
+    }
 }
 
 void render(FoxCamera camera)
 {
-
-    float xx = 0;
-    float yy = 0;
-    Color color = BLACK;
-
+    pthread_t tid;
 
     for (int y = 0; y < HEIGHT; ++y)
     {
         for (int x = 0; x < WIDTH; ++x)
         {
-            
+            traceParam *param = (traceParam *)malloc(sizeof(traceParam));
+            param->x = x;
+            param->y = y;
+            param->camera = camera;
+            //pthread_create(&tid, NULL, traceRay, param);
+            free(param);
+
+            float xx = 0;
+            float yy = 0;
+
+            Color color = BLACK;
+
             xx = (2 * ((x + 0.5) * camera.invWidth) - 1) * camera.angle * camera.aspectratio;
             yy = (1 - 2 * ((y + 0.5) * camera.invHeight)) * camera.angle;
-            color = BLACK;
+            color = WHITE;
 
             Vector3 raydir = {xx, yy, 1};
             normalize(&raydir);
@@ -74,29 +135,32 @@ void render(FoxCamera camera)
 
             int steps = 20;
 
-            if(IsKeyDown(KEY_R))
+            if (IsKeyDown(KEY_R))
             {
-                steps = 70;
+                steps = 50;
             }
-            
+
             for (int k = 0; k < steps; ++k)
             {
                 float distAdd = smallestDist(addVec3(mulVec3(raydir, dist), camera.position));
                 // printf("dist: %f\n point: (x: %f, y: %f, z: %f)", smallestDist, mulVec3(raydir, dist).x, mulVec3(raydir, dist).y, mulVec3(raydir, dist).z);
 
-                dist += distAdd;
-                if (distAdd < 0.1)
-                {
-                    Vector3 pos = absVec3(mulVec3(raydir, dist));
-                    color = (Color){pos.z*10, pos.x*20, pos.y*10, 255};
+                // printf("%f\n",distAdd);
 
+                dist += distAdd;
+                if (distAdd < 2)
+                {
+
+                    Vector3 pos = absVec3(mulVec3(raydir, dist));
+                    // color = (Color){pos.z * 10, pos.x * 20, pos.y * 10, 255};
+                    //printf("%f\n", distAdd);
                     DrawPixel(x, y, color);
                     break;
                 }
-                
             }
         }
     }
+    pthread_join(tid, NULL);
 }
 
 #endif

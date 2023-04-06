@@ -44,7 +44,7 @@ Vector3 absVec3(Vector3 x)
 }
 float sphereSDF(Vector3 point, Vector3 sphere, float radius)
 {
-    float distX = powf(sphere.x - fmod(point.x,9), 2);
+    float distX = powf(sphere.x - point.x, 2);
     float distY = powf(sphere.y - point.y, 2);
     float distZ = powf(sphere.z - point.z, 2);
     return sqrt(distX + distY + distZ) - radius;
