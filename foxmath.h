@@ -20,7 +20,7 @@ Vector3 mulVec3(Vector3 x, float y)
 float dotVec3(Vector3 x, Vector3 y)
 {
     float dot_product = 0.0;
-    
+
     dot_product += x.x * y.x;
     dot_product += x.y * y.y;
     dot_product += x.z * y.z;
@@ -49,9 +49,10 @@ float sphereSDF(Vector3 point, Vector3 sphere, float radius)
     float distZ = powf(sphere.z - point.z, 2);
     return sqrt(distX + distY + distZ) - radius;
 }
-float planeSDF(Vector3 point, float y){
+
+float planeSDF(Vector3 point, float y)
+{
     return point.y - y;
-    //return 1;
 }
 float vmax(Vector3 v)
 {

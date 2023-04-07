@@ -2,6 +2,16 @@
     "files.associations": {
         "cmath": "cpp",
         "stdio.h": "c",
-        "limits": "cpp"
-    }
+        "limits": "cpp",
+        "algorithm": "c",
+        "foxmath.h": "c",
+        "float.h": "c"
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/foxmoss/Projects/FoxEngine",
+            "binaryPath": "/home/foxmoss/Projects/FoxEngine/game",
+            "binaryArgs": []
+        }
+    ]
 }
