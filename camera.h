@@ -9,8 +9,8 @@
 #include <float.h>
 
 const int MAXSTEPS = 20;
-const int WIDTH = 150;
-const int HEIGHT = 150;
+const int WIDTH = 90;
+const int HEIGHT = 90;
 const int REAL_TARGET = 450;
 const int SCALEUP = REAL_TARGET / HEIGHT;
 
@@ -37,8 +37,7 @@ void NewFoxCamera(FoxCamera *cam)
     // this->*framebuffer = malloc(camera.width * camera.height * sizeof(Vector3));
 }
 
-
-SDFObject objects[3] = {{SDF_PLANE, {2, -1, 10}, WHITE, 0, (rayModifer){false}}, {SDF_BOX, {4, 1, 8}, BLUE, 1, (rayModifer){true, {0,0,1}, {}}}, {SDF_SPHERE, {2, 1, 10}, RED, 1,  (rayModifer){false}}};
+SDFObject objects[3] = {{SDF_PLANE, {2, -1, 10}, WHITE, 0, (rayModifer){false}}, {SDF_BOX, {2, 6, 10}, BLUE, 1, (rayModifer){true, {0, -5, 0}}}, {SDF_SPHERE, {2, 4, 10}, RED, 1, (rayModifer){false}}};
 
 SDFReturn smallestDist(Vector3 point, FoxCamera camera)
 {
@@ -98,6 +97,7 @@ void render(FoxCamera camera, Image imageBuffer)
             float dist = 0;
 
             int steps = 20;
+            bool portal = false;
             color = (Color){fabs(raydir.x) * 100, fabs(raydir.y) * 100, 0, 255};
 
             if (!IsKeyDown(KEY_R))
@@ -108,19 +108,22 @@ void render(FoxCamera camera, Image imageBuffer)
             for (int k = 0; k < steps; ++k)
             {
                 SDFReturn smallestDistData = smallestDist(addVec3(mulVec3(raydir, dist), rayOffset), camera);
-                if(smallestDistData.object.modifer.modifys)
-                {
-                    rayOffset = addVec3(rayOffset, smallestDistData.object.modifer.position);
-                    //k--;
-                    continue;
-                }
+
                 float distAdd = smallestDistData.dist;
                 // printf("dist: %f\n point: (x: %f, y: %f, z: %f)", smallestDist, mulVec3(raydir, dist).x, mulVec3(raydir, dist).y, mulVec3(raydir, dist).z);
 
                 dist += distAdd;
                 if (distAdd < 0.1)
                 {
-                    Vector3 rayFinalPos = addVec3(mulVec3(raydir, dist), camera.position);
+                    if (smallestDistData.object.modifer.modifys)
+                    {
+                        portal = true;
+                        rayOffset = addVec3(rayOffset, smallestDistData.object.modifer.position);
+                        //raydir = rotVec3(raydir, axisY, smallestDistData.object.modifer.rotation.y);
+                        // k--;
+                        continue;
+                    }
+                    Vector3 rayFinalPos = addVec3(mulVec3(raydir, dist), rayOffset);
                     Vector3 normal = (Vector3){
                         (smallestDist(addVec3(rayFinalPos, (Vector3){0.0001, 0, 0}), camera).dist - smallestDist(subVec3(rayFinalPos, (Vector3){0.01, 0, 0}), camera).dist),
                         (smallestDist(addVec3(rayFinalPos, (Vector3){0, 0.0001, 0}), camera).dist - smallestDist(subVec3(rayFinalPos, (Vector3){0, 0.01, 0}), camera).dist),
@@ -132,13 +135,17 @@ void render(FoxCamera camera, Image imageBuffer)
 
                     float lightAmmount = fmax((-dotVec3(normal, (Vector3){-1, -1, 0}) + 0.5) * 255 / 2, 0);
                     // printf("%f\n", lightAmmount);
-
+                    if (portal)
+                    {
+                        lightAmmount += 0.1;
+                    }
+                    
                     color = (Color){smallestDistData.object.color.r, smallestDistData.object.color.g, smallestDistData.object.color.b, lightAmmount};
                     break;
                 }
                 else if (distAdd < 1)
                 {
-                    k -= 2;
+                    k -= 1;
                 }
             }
 
