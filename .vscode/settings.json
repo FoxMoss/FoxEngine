@@ -6,7 +6,8 @@
         "algorithm": "c",
         "foxmath.h": "c",
         "float.h": "c",
-        "assert.h": "c"
+        "assert.h": "c",
+        "foxsdf": "c"
     },
     "makefile.launchConfigurations": [
         {

@@ -33,8 +33,8 @@ const int screenHeight = 450;
 int main(void)
 {
     test();
-    //return 0;
-    // Initialization
+    // return 0;
+    //  Initialization
     //--------------------------------------------------------------------------------------
     NewFoxCamera(&camera);
 
@@ -44,6 +44,9 @@ int main(void)
 
     Image imageBuffer = GenImageColor(screenWidth, screenHeight, BLACK);
     Texture displayTexture = LoadTextureFromImage(imageBuffer);
+    DisableCursor();
+
+    Vector3 newPos;
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -61,28 +64,34 @@ int main(void)
 
         if (IsKeyDown(KEY_UP))
         {
-            camera.position.y += 0.3;
+            newPos.y += 0.3;
         }
         if (IsKeyDown(KEY_DOWN))
         {
-            camera.position.y -= 0.3;
+            newPos.y -= 0.3;
         }
         if (IsKeyDown(KEY_S))
         {
-            camera.position.z -= 0.3;
+            newPos.z -= 0.3;
         }
         if (IsKeyDown(KEY_W))
         {
-            camera.position.z += 0.3;
+            newPos.z += 0.3;
         }
         if (IsKeyDown(KEY_A))
         {
-            camera.position.x -= 0.3;
+            newPos.x -= 0.3;
         }
         if (IsKeyDown(KEY_D))
         {
-            camera.position.x += 0.3;
+            newPos.x += 0.3;
         }
+        Vector2 mouseDelta = GetMouseDelta();
+        camera.rotation.y -= mouseDelta.x / 1000;
+        camera.rotation.x += mouseDelta.y / 1000;
+        newPos = rotVec3(newPos, axisY, camera.rotation.y);
+        camera.position = addVec3(newPos, camera.position);
+        newPos = (Vector3){0, 0, 0};
 
         render(camera, imageBuffer);
         UpdateTexture(displayTexture, imageBuffer.data);

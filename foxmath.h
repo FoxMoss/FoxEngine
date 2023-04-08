@@ -26,10 +26,6 @@ float dotVec3(Vector3 x, Vector3 y)
     dot_product += x.z * y.z;
     return dot_product;
 }
-void vector_product(Vector3 x, Vector3 y)
-{
-    return ((x.y * y.z) - (x.z * y.y)) + ((x.x * y.z) - (x.z * y.x)) + ((x.x * y.y) - (x.y * y.x));
-}
 Vector3 addVec3(Vector3 x, Vector3 y)
 {
     return (Vector3){x.x + y.x, x.y + y.y, x.z + y.z};
@@ -55,34 +51,43 @@ typedef enum Axis
 
 Vector3 rotVec3(Vector3 x, Axis axis, float rot)
 {
-    Vector3 ret;
+    Vector3 ret = x;
     if (axis == axisY)
     {
-        printf("adfas");
-        ret.x = x.x * cos(rot) - x.z * sin(rot);
-        ret.z = x.z * sin(rot) + x.x * cos(rot);
+
+        float c = cos(rot);
+        float s = sin(rot);
+        // return mat2(c, s, -s, c);
+        //  [c -s    [x    [cx + -sz
+        //   s  c] *  z] =  sx +  cz]
+
+        // Personal Best!
+        // ret.x = x.x * cos(rot) - x.z * sin(rot);
+        // ret.z = x.z * sin(rot) + x.x * cos(rot);
+        ret.x = ( c * x.x) + (-s * x.z);
+        ret.z = ( s * x.x) + ( c * x.z);
+    }
+
+    if (axis == axisX)
+    {
+
+        float c = cos(rot);
+        float s = sin(rot);
+        // return mat2(c, s, -s, c);
+        //  [c -s    [x    [cx + -sz
+        //   s  c] *  z] =  sx +  cz]
+
+        // Personal Best!
+        // ret.x = x.x * cos(rot) - x.z * sin(rot);
+        // ret.z = x.z * sin(rot) + x.x * cos(rot);
+        ret.y = ( c * x.y) + (-s * x.z);
+        ret.z = ( s * x.y) + ( c * x.z);
     }
     return ret;
-}
-float sphereSDF(Vector3 point, Vector3 sphere, float radius)
-{
-    float distX = powf(sphere.x - point.x, 2);
-    float distY = powf(sphere.y - point.y, 2);
-    float distZ = powf(sphere.z - point.z, 2);
-    return sqrt(distX + distY + distZ) - radius;
-}
-
-float planeSDF(Vector3 point, float y)
-{
-    return point.y - y;
 }
 float vmax(Vector3 v)
 {
     return fmax(fmax(v.x, v.y), v.z);
-}
-float boxcheapSDF(Vector3 point, Vector3 center, Vector3 scale)
-{
-    return vmax(subVec3(absVec3(subVec3(point, center)), scale));
 }
 void normalize(Vector3 *vector)
 {
