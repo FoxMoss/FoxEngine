@@ -26,6 +26,10 @@ float dotVec3(Vector3 x, Vector3 y)
     dot_product += x.z * y.z;
     return dot_product;
 }
+void vector_product(Vector3 x, Vector3 y)
+{
+    return ((x.y * y.z) - (x.z * y.y)) + ((x.x * y.z) - (x.z * y.x)) + ((x.x * y.y) - (x.y * y.x));
+}
 Vector3 addVec3(Vector3 x, Vector3 y)
 {
     return (Vector3){x.x + y.x, x.y + y.y, x.z + y.z};
@@ -41,6 +45,24 @@ Vector3 maxVec3(Vector3 x, Vector3 y)
 Vector3 absVec3(Vector3 x)
 {
     return (Vector3){fabs(x.x), fabs(x.y), fabs(x.z)};
+}
+typedef enum Axis
+{
+    axisX = 0,
+    axisY = 1,
+    axisZ = 2
+} Axis;
+
+Vector3 rotVec3(Vector3 x, Axis axis, float rot)
+{
+    Vector3 ret;
+    if (axis == axisY)
+    {
+        printf("adfas");
+        ret.x = x.x * cos(rot) - x.z * sin(rot);
+        ret.z = x.z * sin(rot) + x.x * cos(rot);
+    }
+    return ret;
 }
 float sphereSDF(Vector3 point, Vector3 sphere, float radius)
 {

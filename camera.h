@@ -25,29 +25,54 @@ typedef struct FoxCamera
     float angle;
 } FoxCamera;
 
-void NewFoxCamera(FoxCamera *this)
+void NewFoxCamera(FoxCamera *cam)
 {
-    this->position = (Vector3){0, 0, 0};
-    this->rotation = (Vector3){0, 0, 0};
-    this->invWidth = 1 / (float)WIDTH;
-    this->invHeight = 1 / (float)HEIGHT;
-    this->fov = 30;
-    this->aspectratio = WIDTH / (float)HEIGHT;
-    this->angle = tan(PI * 0.5 * this->fov / 180.);
+    cam->position = (Vector3){0, 0, 0};
+    cam->rotation = (Vector3){0, 0, 0};
+    cam->invWidth = 1 / (float)WIDTH;
+    cam->invHeight = 1 / (float)HEIGHT;
+    cam->fov = 30;
+    cam->aspectratio = WIDTH / (float)HEIGHT;
+    cam->angle = tan(PI * 0.5 * cam->fov / 180.);
     // this->*framebuffer = malloc(camera.width * camera.height * sizeof(Vector3));
 }
 
-Vector3 objects[1] = {(Vector3){2, -1, 10}};
+typedef enum SDFType
+{
+    SDF_SPHERE = 0,
+    SDF_PLANE = 1
+} SDFType;
+typedef struct SDFObject
+{
+    SDFType type;
+    Vector3 postion;
 
-float smallestDist(Vector3 point)
+} SDFObject;
+
+SDFObject objects[2] = {{SDF_PLANE, {2, -1, 10}}, {SDF_SPHERE, {0, 2, 10}}};
+
+float smallestDist(Vector3 point, FoxCamera camera)
 {
     float smallest = INFINITY;
-    for (int i = 0; i < 1; i++)
-    {
 
-        smallest = fminf(smallest, sphereSDF(point, objects[i], 1));
-        smallest = fminf(smallest, planeSDF(point, objects[i].y));
-        // smallest = fminf(smallest, boxcheapSDF(point, objects[i], (Vector3) {1,1,1}));
+    for (int i = 0; i < sizeof(objects) / sizeof(SDFObject); i++)
+    {
+        //Vector3 calculatedPosition =addVec3(rotVec3(subVec3(objects[i].postion, camera.position), axisY, camera.rotation.y), camera.position);
+        Vector3 calculatedPosition = objects[i].postion;
+        switch (objects[i].type)
+        {
+        case SDF_SPHERE:
+            smallest = fminf(smallest, sphereSDF(point, calculatedPosition, 1));
+            break;
+        case SDF_PLANE:
+
+            smallest = fminf(smallest, planeSDF(point, calculatedPosition.y));
+            break;
+
+        default:
+            printf("ERROR: Undf object.");
+            break;
+        }
     }
 
     return smallest;
@@ -81,14 +106,26 @@ void render(FoxCamera camera, Image imageBuffer)
 
             for (int k = 0; k < steps; ++k)
             {
-                float distAdd = smallestDist(addVec3(mulVec3(raydir, dist), camera.position));
+                float distAdd = smallestDist(addVec3(mulVec3(raydir, dist), camera.position), camera);
                 // printf("dist: %f\n point: (x: %f, y: %f, z: %f)", smallestDist, mulVec3(raydir, dist).x, mulVec3(raydir, dist).y, mulVec3(raydir, dist).z);
 
                 dist += distAdd;
                 if (distAdd < 0.4)
                 {
-                    Vector3 pos = absVec3(addVec3(mulVec3(raydir, dist), camera.position));
-                    color = (Color){pos.z * 10, pos.x * 20, pos.y * 10, 255};
+                    Vector3 rayFinalPos = addVec3(mulVec3(raydir, dist), camera.position);
+                    Vector3 normal = (Vector3){
+                        (smallestDist(addVec3(rayFinalPos, (Vector3){0.01, 0, 0}), camera) - smallestDist(subVec3(rayFinalPos, (Vector3){0.01, 0, 0}), camera)),
+                        (smallestDist(addVec3(rayFinalPos, (Vector3){0, 0.01, 0}), camera) - smallestDist(subVec3(rayFinalPos, (Vector3){0, 0.01, 0}), camera)),
+                        (smallestDist(addVec3(rayFinalPos, (Vector3){0, 0, 0.01}), camera) - smallestDist(subVec3(rayFinalPos, (Vector3){0, 0, 0.01}), camera))};
+
+                    normalize(&normal);
+
+                    // Vector3 pos = absVec3(addVec3(mulVec3(raydir, dist), camera.position));
+
+                    float lightAmmount = fmax(-dotVec3(normal, (Vector3){-100, 0, 0}), 0);
+                    // printf("%f\n", lightAmmount);
+
+                    color = (Color){lightAmmount, lightAmmount, lightAmmount, 255};
                     break;
                 }
             }

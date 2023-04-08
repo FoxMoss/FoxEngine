@@ -5,7 +5,8 @@
         "limits": "cpp",
         "algorithm": "c",
         "foxmath.h": "c",
-        "float.h": "c"
+        "float.h": "c",
+        "assert.h": "c"
     },
     "makefile.launchConfigurations": [
         {

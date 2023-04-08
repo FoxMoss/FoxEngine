@@ -23,19 +23,17 @@
 
 #include "raylib.h"
 #include "camera.h"
+#include "testsmath.c"
 
 FoxCamera camera;
 
 const int screenWidth = 450;
 const int screenHeight = 450;
 
-
-
-
-
-
 int main(void)
 {
+    test();
+    //return 0;
     // Initialization
     //--------------------------------------------------------------------------------------
     NewFoxCamera(&camera);
@@ -63,19 +61,27 @@ int main(void)
 
         if (IsKeyDown(KEY_UP))
         {
-            camera.position.y++;
+            camera.position.y += 0.3;
         }
         if (IsKeyDown(KEY_DOWN))
         {
-            camera.position.y--;
+            camera.position.y -= 0.3;
         }
         if (IsKeyDown(KEY_S))
         {
-            camera.position.z--;
+            camera.position.z -= 0.3;
         }
         if (IsKeyDown(KEY_W))
         {
-            camera.position.z++;
+            camera.position.z += 0.3;
+        }
+        if (IsKeyDown(KEY_A))
+        {
+            camera.position.x -= 0.3;
+        }
+        if (IsKeyDown(KEY_D))
+        {
+            camera.position.x += 0.3;
         }
 
         render(camera, imageBuffer);
