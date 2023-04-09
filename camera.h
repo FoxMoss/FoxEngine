@@ -9,8 +9,8 @@
 #include <float.h>
 
 const int MAXSTEPS = 20;
-const int WIDTH = 90;
-const int HEIGHT = 90;
+const int WIDTH = 150;
+const int HEIGHT = 150;
 const int REAL_TARGET = 450;
 const int SCALEUP = REAL_TARGET / HEIGHT;
 
@@ -37,7 +37,7 @@ void NewFoxCamera(FoxCamera *cam)
     // this->*framebuffer = malloc(camera.width * camera.height * sizeof(Vector3));
 }
 
-SDFObject objects[3] = {{SDF_PLANE, {2, -1, 10}, WHITE, 0, (rayModifer){false}}, {SDF_BOX, {2, 6, 10}, BLUE, 1, (rayModifer){true, {0, -5, 0}}}, {SDF_SPHERE, {2, 4, 10}, RED, 1, (rayModifer){false}}};
+SDFObject objects[3] = {{SDF_PLANE, {2, -1, 10}, WHITE, 0, (rayModifer){false}}, {SDF_BOX, {8, 4, 10}, BLUE, 4, (rayModifer){false, {-5, 0, 0}, {0, 0, 0}}}, /*{SDF_BOX, {9, 4, 10}, BLUE, 5, (rayModifer){false, {-5, 0, 0}, {0, 0, 0}}},*/ {SDF_SPHERE, {2, 4, 10}, RED, 1, (rayModifer){false}}};
 
 SDFReturn smallestDist(Vector3 point, FoxCamera camera)
 {
@@ -119,7 +119,7 @@ void render(FoxCamera camera, Image imageBuffer)
                     {
                         portal = true;
                         rayOffset = addVec3(rayOffset, smallestDistData.object.modifer.position);
-                        //raydir = rotVec3(raydir, axisY, smallestDistData.object.modifer.rotation.y);
+                        raydir = rotVec3(raydir, axisY, smallestDistData.object.modifer.rotation.y);
                         // k--;
                         continue;
                     }
