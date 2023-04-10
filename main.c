@@ -23,16 +23,25 @@
 
 #include "raylib.h"
 #include "camera.h"
-#include "testsmath.c"
+
+#if defined(PLATFORM_WEB)
+    #include <emscripten/emscripten.h>
+#endif
 
 FoxCamera camera;
 
-const int screenWidth = 450;
-const int screenHeight = 450;
+const int screenWidth = 900;
+const int screenHeight = 900;
+
+void UpdateDrawFrame(void);
+
+Vector3 newPos;
+
+Image imageBuffer;
+Texture displayTexture;
 
 int main(void)
 {
-    test();
     // return 0;
     //  Initialization
     //--------------------------------------------------------------------------------------
@@ -40,69 +49,71 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "[foxmoss]");
 
-    SetTargetFPS(60);
+    SetTargetFPS(120);
 
-    Image imageBuffer = GenImageColor(screenWidth, screenHeight, BLACK);
-    Texture displayTexture = LoadTextureFromImage(imageBuffer);
+    imageBuffer = GenImageColor(screenWidth, screenHeight, BLACK);
+    displayTexture = LoadTextureFromImage(imageBuffer);
     DisableCursor();
 
-    Vector3 newPos;
+#if defined(PLATFORM_WEB)
+    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+#else
+    SetTargetFPS(60);   // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose()) // Detect window close button or ESC key
+    while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-        ClearBackground(BLACK);
-
-        if (IsKeyDown(KEY_UP))
-        {
-            newPos.y += 0.3;
-        }
-        if (IsKeyDown(KEY_DOWN))
-        {
-            newPos.y -= 0.3;
-        }
-        if (IsKeyDown(KEY_S))
-        {
-            newPos.z -= 0.3;
-        }
-        if (IsKeyDown(KEY_W))
-        {
-            newPos.z += 0.3;
-        }
-        if (IsKeyDown(KEY_A))
-        {
-            newPos.x -= 0.3;
-        }
-        if (IsKeyDown(KEY_D))
-        {
-            newPos.x += 0.3;
-        }
-        Vector2 mouseDelta = GetMouseDelta();
-        camera.rotation.y -= mouseDelta.x / 1000;
-        camera.rotation.x += mouseDelta.y / 1000;
-        newPos = rotVec3(newPos, axisY, camera.rotation.y);
-        camera.position = addVec3(newPos, camera.position);
-        newPos = (Vector3){0, 0, 0};
-
-        render(camera, imageBuffer);
-        UpdateTexture(displayTexture, imageBuffer.data);
-        DrawTexture(displayTexture, 0, 0, WHITE);
-
-        DrawFPS(10, 10);
-
-        EndDrawing();
+        UpdateDrawFrame();
     }
+#endif
 
     CloseWindow();
 
     return 0;
+}
+void UpdateDrawFrame(void)
+{
+    BeginDrawing();
+
+    ClearBackground(BLACK);
+
+    if (IsKeyDown(KEY_UP))
+    {
+        newPos.y += 0.3;
+    }
+    if (IsKeyDown(KEY_DOWN))
+    {
+        newPos.y -= 0.3;
+    }
+    if (IsKeyDown(KEY_S))
+    {
+        newPos.z -= 0.3;
+    }
+    if (IsKeyDown(KEY_W))
+    {
+        newPos.z += 0.3;
+    }
+    if (IsKeyDown(KEY_A))
+    {
+        newPos.x -= 0.3;
+    }
+    if (IsKeyDown(KEY_D))
+    {
+        newPos.x += 0.3;
+    }
+    Vector2 mouseDelta = GetMouseDelta();
+    camera.rotation.y -= mouseDelta.x / 1000;
+    camera.rotation.x += mouseDelta.y / 1000;
+    newPos = rotVec3(newPos, axisY, camera.rotation.y);
+    camera.position = addVec3(newPos, camera.position);
+    newPos = (Vector3){0, 0, 0};
+
+    render(camera, imageBuffer);
+    UpdateTexture(displayTexture, imageBuffer.data);
+    DrawTexture(displayTexture, 0, 0, WHITE);
+
+    DrawFPS(10, 10);
+
+    EndDrawing();
 }

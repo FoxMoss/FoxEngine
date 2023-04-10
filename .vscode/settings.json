@@ -7,7 +7,9 @@
         "foxmath.h": "c",
         "float.h": "c",
         "assert.h": "c",
-        "foxsdf": "c"
+        "foxsdf": "c",
+        "stdlib.h": "c",
+        "raylib.h": "c"
     },
     "makefile.launchConfigurations": [
         {

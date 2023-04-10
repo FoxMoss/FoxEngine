@@ -4,10 +4,6 @@
 #include "foxmath.h"
 
 
-float boxcheapSDF(Vector3 point, Vector3 center, Vector3 scale)
-{
-    return vmax(subVec3(absVec3(subVec3(point, center)), scale));
-}
 
 typedef enum SDFType
 {
@@ -20,6 +16,7 @@ typedef struct rayModifer
     bool modifys;
     Vector3 position;
     Vector3 rotation;
+    float scaler;
 } rayModifer;
 typedef struct SDFObject
 {
@@ -34,20 +31,14 @@ typedef struct SDFReturn
 {
     SDFObject object;
     float dist;
+    SDFObject rayEffect;
+    float effectDist;
+
 
 } SDFReturn;
 
-float sphereSDF(Vector3 point, Vector3 sphere, float radius)
-{
-    float distX = powf(sphere.x - point.x, 2);
-    float distY = powf(sphere.y - point.y, 2);
-    float distZ = powf(sphere.z - point.z, 2);
-    return sqrt(distX + distY + distZ) - radius;
-}
-
-float planeSDF(Vector3 point, float y)
-{
-    return point.y - y;
-}
+float boxcheapSDF(Vector3 point, Vector3 center, Vector3 scale);
+float sphereSDF(Vector3 point, Vector3 sphere, float radius);
+float planeSDF(Vector3 point, float y);
 
 #endif
