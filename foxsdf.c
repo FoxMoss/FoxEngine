@@ -15,3 +15,9 @@ float planeSDF(Vector3 point, float y)
 {
     return point.y - y;
 }
+float torusSDF(Vector3 point, Vector3 postion, Vector2 size)
+{
+    point = subVec3(point, postion);
+    Vector2 q = (Vector2){length2d((Vector2){point.x, point.z}) - size.x, point.y};
+    return length2d(q) - size.y;
+}

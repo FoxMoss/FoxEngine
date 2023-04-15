@@ -25,7 +25,7 @@
 #include "camera.h"
 
 #if defined(PLATFORM_WEB)
-    #include <emscripten/emscripten.h>
+#include <emscripten/emscripten.h>
 #endif
 
 FoxCamera camera;
@@ -45,7 +45,9 @@ int main(void)
     // return 0;
     //  Initialization
     //--------------------------------------------------------------------------------------
+
     NewFoxCamera(&camera);
+    camera.position = (Vector3){0, 5, 0};
 
     InitWindow(screenWidth, screenHeight, "[foxmoss]");
 
@@ -58,11 +60,11 @@ int main(void)
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
-    SetTargetFPS(60);   // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         UpdateDrawFrame();
     }
@@ -78,14 +80,16 @@ void UpdateDrawFrame(void)
 
     ClearBackground(BLACK);
 
-    if (IsKeyDown(KEY_UP))
+    newPos = (Vector3){0, 0, 0};
+
+    /*if (IsKeyDown(KEY_UP))
     {
         newPos.y += 0.3;
     }
     if (IsKeyDown(KEY_DOWN))
     {
         newPos.y -= 0.3;
-    }
+    }*/
     if (IsKeyDown(KEY_S))
     {
         newPos.z -= 0.3;
@@ -106,10 +110,46 @@ void UpdateDrawFrame(void)
     camera.rotation.y -= mouseDelta.x / 1000;
     camera.rotation.x += mouseDelta.y / 1000;
     newPos = rotVec3(newPos, axisY, camera.rotation.y);
-    camera.position = addVec3(newPos, camera.position);
-    newPos = (Vector3){0, 0, 0};
+    newPos = addVec3(newPos, camera.position);
 
-    render(camera, imageBuffer);
+    SDFReturn cameraDist = smallestDist((Vector3){newPos.x, newPos.y, newPos.z}, camera);
+
+    if (cameraDist.effectDist < 0.5)
+    {
+        camera.rotation = addVec3(camera.rotation, cameraDist.rayEffect.modifer.rotation);
+        newPos = addVec3(newPos, cameraDist.rayEffect.modifer.position);
+    }
+
+    if (cameraDist.dist < 0.1)
+    {
+        newPos.x = camera.position.x;
+        cameraDist = smallestDist((Vector3){newPos.x, newPos.y, newPos.z}, camera);
+        if (cameraDist.dist < 0.1)
+        {
+            newPos.y = camera.position.y;
+
+            cameraDist = smallestDist((Vector3){newPos.x, newPos.y, newPos.z}, camera);
+            if (cameraDist.dist < 0.1)
+            {
+                newPos.z = camera.position.z;
+
+                cameraDist = smallestDist((Vector3){newPos.x, newPos.y, newPos.z}, camera);
+            }
+        }
+    }
+
+    camera.position = newPos;
+    newPos = (Vector3){0, 0, 0};
+    if (cameraDist.effectDist < 0.5)
+    {
+        //camera.rotation = addVec3(camera.rotation, cameraDist.rayEffect.modifer.rotation);
+        camera.position = addVec3(camera.position, cameraDist.rayEffect.modifer.position);
+    }
+
+    // cameraDist = smallestDist(camera.position, camera);
+    
+
+    render(&camera, imageBuffer);
     UpdateTexture(displayTexture, imageBuffer.data);
     DrawTexture(displayTexture, 0, 0, WHITE);
 

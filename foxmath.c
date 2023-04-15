@@ -9,6 +9,12 @@ float length(Vector3 vector)
     float distZ = vector.z * vector.z;
     return sqrt(distX + distY + distZ);
 }
+float length2d(Vector2 vector)
+{
+    float distX = vector.x * vector.x;
+    float distY = vector.y * vector.y;
+    return sqrt(distX + distY);
+}
 Vector3 mulVec3(Vector3 x, float y)
 {
     return (Vector3){x.x * y, x.y * y, x.z * y};

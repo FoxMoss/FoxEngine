@@ -15,7 +15,7 @@ void NewFoxCamera(FoxCamera *cam)
 SDFReturn smallestDist(Vector3 point, FoxCamera camera)
 {
 
-    SDFObject objects[3] = {{SDF_PLANE, {2, -1, 10}, WHITE, 0, (rayModifer){false}}, {SDF_BOX, {8, 4, 10}, BLUE, 2, (rayModifer){true, {0, 0, 0}, {0, 0, 0}, 1.1}}, /*{SDF_BOX, {9, 4, 10}, BLUE, 5, (rayModifer){false, {-5, 0, 0}, {0, 0, 0}}},*/ {SDF_BOX, {2, 4, 10}, RED, 1, (rayModifer){false}}};
+    SDFObject objects[3] = {{SDF_PLANE, {2, 0, 10}, WHITE, {0,0,0}, (rayModifer){false}}, {SDF_BOX, {8, 4, 10}, BLUE, {5,5,5}, (rayModifer){true, {0, 5, 0}, {0, 0, 0}, 1}}, /*{SDF_BOX, {9, 4, 10}, BLUE, 5, (rayModifer){false, {-5, 0, 0}, {0, 0, 0}}},*/ {SDF_TORUS, {-8, 4, 10}, RED, {9,2,3}, (rayModifer){false}}};
 
     float smallest = INFINITY;
     SDFObject object;
@@ -29,14 +29,17 @@ SDFReturn smallestDist(Vector3 point, FoxCamera camera)
         switch (objects[i].type)
         {
         case SDF_SPHERE:
-            smallest = fminf(smallest, sphereSDF(point, objects[i].postion, objects[i].scale));
+            smallest = fminf(smallest, sphereSDF(point, objects[i].postion, objects[i].scale.y));
             break;
         case SDF_PLANE:
             smallest = fminf(smallest, planeSDF(point, objects[i].postion.y));
             break;
         case SDF_BOX:
-            smallest = fminf(smallest, boxcheapSDF(point, objects[i].postion, (Vector3){objects[i].scale, objects[i].scale, objects[i].scale}));
+            smallest = fminf(smallest, boxcheapSDF(point, objects[i].postion, objects[i].scale));
             // amallest += sphereSDF(point, objects[2].postion, objects[2].scale);
+            break;
+        case SDF_TORUS:
+            smallest = fminf(smallest, torusSDF(point, objects[i].postion, (Vector2){objects[i].scale.x, objects[i].scale.y}));
             break;
         default:
             printf("ERROR: Undf object.");
@@ -47,8 +50,8 @@ SDFReturn smallestDist(Vector3 point, FoxCamera camera)
             if (objects[i].modifer.modifys)
             {
                 rayEffect = objects[i];
-                smallest = fmax(smallest, 0.9);
                 effectDist = smallest;
+                smallest = fmax(smallest, 0.9);
                 smallest = fmin(lastSmallest, smallest);
             }
             else
@@ -61,12 +64,22 @@ SDFReturn smallestDist(Vector3 point, FoxCamera camera)
     return (SDFReturn){object, smallest, rayEffect, effectDist};
 }
 
-void render(FoxCamera camera, Image imageBuffer)
+void render(FoxCamera *cameraP, Image imageBuffer)
 {
     float xx = 0;
     float yy = 0;
     Color color = BLACK;
 
+    FoxCamera camera = *cameraP;
+
+    SDFReturn cameraDist = smallestDist(camera.position, camera);
+    if (cameraDist.effectDist < 0.5)
+    {
+        camera.rotation = addVec3(camera.rotation, cameraDist.rayEffect.modifer.rotation);
+        camera.position = addVec3(camera.position, cameraDist.rayEffect.modifer.position);
+    }
+    cameraP->position = camera.position;
+    cameraP->rotation = camera.rotation;
     for (int y = 0; y < WIDTH; y++)
     {
         for (int x = 0; x < HEIGHT; x++)
@@ -107,8 +120,8 @@ void render(FoxCamera camera, Image imageBuffer)
                 {
                     portal = true;
                     rayOffset = addVec3(rayOffset, smallestDistData.rayEffect.modifer.position);
-                    rotation = smallestDistData.rayEffect.modifer.rotation.y;
-                    raydir.z *= smallestDistData.rayEffect.modifer.scaler;
+                    rotation += smallestDistData.rayEffect.modifer.rotation.y;
+                    raydir = mulVec3(raydir, smallestDistData.rayEffect.modifer.scaler);
 
                     // steps++;
                     continue;
@@ -128,15 +141,12 @@ void render(FoxCamera camera, Image imageBuffer)
 
                         // Vector3 pos = absVec3(addVec3(mulVec3(raydir, dist), camera.position));
 
-                        float lightAmmount = fmax((-dotVec3(normal, (Vector3){-1, -1, 0}) + 0.5) * 255 / 2, 0);
+                        lightAmmount = fmax((-dotVec3(normal, (Vector3){-1, -1, 0}) + 0.5) * 255 / 2, 0);
                         // printf("%f\n", lightAmmount);
-                    }else
-                    {
-                        //lightAmmount =  100 * (abs((int)calculatedPosition.x)%2);
                     }
-                    if (portal)
+                    else
                     {
-                        lightAmmount += 10;
+                        lightAmmount = 100 * ((int)(calculatedPosition.z / 10 + calculatedPosition.x / 10) % 2);
                     }
 
                     color = (Color){smallestDistData.object.color.r, smallestDistData.object.color.g, smallestDistData.object.color.b, lightAmmount};
@@ -147,7 +157,10 @@ void render(FoxCamera camera, Image imageBuffer)
                     steps += 1;
                 }
             }
-
+            if (portal)
+            {
+                //color = RED;
+            }
             // ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, (Color) {k, k, k, 255});
             ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, color);
         }

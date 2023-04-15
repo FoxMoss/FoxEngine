@@ -11,8 +11,8 @@
 
 
 #define MAXSTEPS 20
-#define WIDTH 90
-#define HEIGHT 90
+#define WIDTH 150
+#define HEIGHT 150
 #define REAL_TARGET 900
 #define SCALEUP REAL_TARGET / HEIGHT
 
@@ -21,6 +21,7 @@ typedef struct FoxCamera
 {
     Vector3 rotation;
     Vector3 position;
+    Vector3 scale;
     float invWidth;
     float invHeight;
     float fov;
@@ -32,6 +33,6 @@ void NewFoxCamera(FoxCamera *cam);
 
 
 SDFReturn smallestDist(Vector3 point, FoxCamera camera);
-void render(FoxCamera camera, Image imageBuffer);
+void render(FoxCamera * camera, Image imageBuffer);
 
 #endif

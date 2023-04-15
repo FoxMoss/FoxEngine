@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 float length(Vector3 vector);
+float length2d(Vector2 vector);
 Vector3 mulVec3(Vector3 x, float y);
 float dotVec3(Vector3 x, Vector3 y);
 Vector3 addVec3(Vector3 x, Vector3 y);
