@@ -47,6 +47,7 @@ Vector3 absVec3(Vector3 x)
 
 Vector3 rotVec3(Vector3 x, Axis axis, float rot)
 {
+    
     Vector3 ret = x;
     if (axis == axisY)
     {

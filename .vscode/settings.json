@@ -9,7 +9,9 @@
         "assert.h": "c",
         "foxsdf": "c",
         "stdlib.h": "c",
-        "raylib.h": "c"
+        "raylib.h": "c",
+        "raymath.h": "c",
+        "camera.h": "c"
     },
     "makefile.launchConfigurations": [
         {

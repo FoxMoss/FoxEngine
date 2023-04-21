@@ -24,11 +24,14 @@ typedef struct SDFObject
     Color color;
     Vector3 scale;
     rayModifer modifer;
+    bool wins;
+    bool reflect;
 
 } SDFObject;
 typedef struct SDFReturn
 {
     SDFObject object;
+    float secondSmallest;
     float dist;
     SDFObject rayEffect;
     float effectDist;
