@@ -179,24 +179,22 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                         }
                     }
 
-                    color = (Color){smallestDistData.object.color.r, smallestDistData.object.color.g, smallestDistData.object.color.b, lightAmmount};
+                    color = (Color){smallestDistData.object.color.r*lightAmmount/255, smallestDistData.object.color.g*lightAmmount/255, smallestDistData.object.color.b*lightAmmount/255, 255};
                     break;
                 }
                 else if (distAdd < 1 && smallestDistData.object.type != SDF_PLANE)
                 {
                     steps += 1;
                 }
-                if(smallestDistData.secondSmallest < 1 && smallestDistData.dist < 1)
-                {
-                    close = 255;
-                }
             }
-            if (steps == k && 0 == 0)
+            // ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, (Color) {k, k, k, 255});
+            //color = ColorTint((Color){color.r, color.g, color.b, 255}, (Color){color.a, color.a, color.a, 255});
+
+            if (steps == k)
             {
                 color = BLANK;
             }
-            // ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, (Color) {k, k, k, 255});
-            color = (Color){color.r, color.g, color.b, color.a - close};
+
             ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, color);
         }
     }
