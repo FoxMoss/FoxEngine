@@ -58,8 +58,8 @@ SDFReturn smallestDist(Vector3 point, FoxCamera camera, SDFLevel level)
             {
                 rayEffect = level.objects[i];
                 effectDist = smallest;
-                smallest = fmax(smallest, 0.9);
-                smallest = fmin(lastSmallest, smallest);
+                //smallest = fmax(smallest, 0.9);
+                //smallest = fmin(lastSmallest, smallest);
             }
             else
             {
@@ -108,8 +108,8 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
 
             int steps = 10;
             bool portal = false;
-            color = (Color){fabs(raydir.x) * 100, fabs(raydir.y) * 100, 0, 255};
-            // color = WHITE;
+            //color = (Color){fabs(raydir.x) * 100, fabs(raydir.y) * 100, 0, 255};
+            color = BLACK;
             if (!IsKeyDown(KEY_R))
             {
                 steps = 30;
@@ -117,7 +117,6 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
             bool close = 0;
             int k = 0;
             float rotation = 0;
-            float totalEffectDist =0;
             for (k = 0; k < steps; ++k)
             {
                 Vector3 calculatedPosition = addVec3(mulVec3(rotVec3(raydir, axisY, rotation), dist), rayOffset);
@@ -133,14 +132,9 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                     //rayOffset = addVec3(rayOffset, smallestDistData.rayEffect.modifer.position);
                     //rotation += smallestDistData.rayEffect.modifer.rotation.y;
                     //dist = dist*smallestDistData.rayEffect.modifer.scaler;
-                    Vector3 david = subVec3(rayOffset, smallestDistData.rayEffect.postion);
-                    rayOffset = addVec3(mulVec3(david, smallestDistData.rayEffect.modifer.scaler), rayOffset);
-
+                    //Vector3 david = subVec3(rayOffset, smallestDistData.rayEffect.postion);
+                    //rayOffset = addVec3(mulVec3(david, smallestDistData.rayEffect.modifer.scaler), rayOffset
                     continue;
-                }
-                else
-                {
-                    totalEffectDist = 0;
                 }
                 if (distAdd < 0.1)
                 {
@@ -197,13 +191,13 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                     close = 255;
                 }
             }
-            if (portal)
+            if (steps == k && 0 == 0)
             {
-                // color = RED;
+                color = BLANK;
             }
             // ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, (Color) {k, k, k, 255});
             color = (Color){color.r, color.g, color.b, color.a - close};
-            ImageDrawRectangle(&imageBuffer, x * 1, y * 1, 1, 1, color);
+            ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, color);
         }
     }
 }

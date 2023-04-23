@@ -379,7 +379,8 @@ PROJECT_SOURCE_FILES ?= \
     camera.c \
     foxmath.c \
     foxsdf.c \
-    levels.c
+    levels.c \
+    upscale.c
 
 # Define all object files from source files
 OBJS = $(patsubst %.c, %.o, $(PROJECT_SOURCE_FILES))

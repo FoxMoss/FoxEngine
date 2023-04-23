@@ -24,6 +24,7 @@
 #include "raylib.h"
 #include "camera.h"
 #include "levels.h"
+#include "upscale.h"
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
@@ -136,7 +137,7 @@ void gameSequence(SDFLevel level)
         newPos = addVec3(newPos, cameraDist.rayEffect.modifer.position);
     }
 
-    if (cameraDist.dist < 0.1)
+    if (cameraDist.dist < 0.3)
     {
         Vector3 normal = (Vector3){
             (smallestDist(addVec3(newPos, (Vector3){0.0001, 0, 0}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0.01, 0, 0}), camera, level).dist),
@@ -168,9 +169,16 @@ void gameSequence(SDFLevel level)
 
     camera.position = newPos;
     newPos = (Vector3){0, 0, 0};
-    if (cameraDist.dist < 0.1)
+    if (cameraDist.dist < 0.3)
     {
         if (cameraDist.object.wins)
+        {
+            step++;
+        }
+    }
+    if (cameraDist.effectDist < 0.3)
+    {
+        if (cameraDist.rayEffect.wins)
         {
             step++;
         }
@@ -179,6 +187,7 @@ void gameSequence(SDFLevel level)
     // cameraDist = smallestDist(camera.position, camera, level1);
 
     render(&camera, imageBuffer, level);
+    //upscaleImage(&imageBuffer, 75, 12);
     UpdateTexture(displayTexture, imageBuffer.data);
     DrawTexture(displayTexture, 0, 0, WHITE);
 
