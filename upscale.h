@@ -3,7 +3,10 @@
 
 #include "raylib.h"
 
-void upscaleImage(Image* buffer, int size, int upscale);
+void upscaleImage(Image* buffer, int size);
 
+bool coloreqeq(Color x, Color y);
+
+Color GetImageColorSafe(Image *image, int x, int y);
 
 #endif

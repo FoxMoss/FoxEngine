@@ -48,18 +48,23 @@ SDFReturn smallestDist(Vector3 point, FoxCamera camera, SDFLevel level)
         case SDF_TORUS:
             smallest = fminf(smallest, torusSDF(point, level.objects[i].postion, (Vector2){level.objects[i].scale.x, level.objects[i].scale.y}));
             break;
+        case SDF_MANDELBULB:
+            smallest = fminf(smallest, mandelbulbSDF(point, level.objects[i].postion));
+            break;
         default:
             printf("ERROR: Undf object: %i \n", level.objects[i].type);
             break;
         }
         if (lastSmallest != smallest)
         {
-            if (level.objects[i].modifer.modifys)
+            if (level.objects[i].modifer.modifys && !level.objects[i].wins)
             {
                 rayEffect = level.objects[i];
+                if(level.objects[i].wins)
+                {}
                 effectDist = smallest;
-                //smallest = fmax(smallest, 0.9);
-                //smallest = fmin(lastSmallest, smallest);
+                smallest = fmax(smallest, 0.9);
+                smallest = fmin(lastSmallest, smallest);
             }
             else
             {
@@ -129,7 +134,7 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                 if (smallestDistData.effectDist < 0.1)
                 {
                     portal = true;
-                    //rayOffset = addVec3(rayOffset, smallestDistData.rayEffect.modifer.position);
+                    rayOffset = addVec3(rayOffset, smallestDistData.rayEffect.modifer.position);
                     //rotation += smallestDistData.rayEffect.modifer.rotation.y;
                     //dist = dist*smallestDistData.rayEffect.modifer.scaler;
                     //Vector3 david = subVec3(rayOffset, smallestDistData.rayEffect.postion);
@@ -175,7 +180,7 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                     {
                         if (((int)(calculatedPosition.z / 5) % 2) == 0 && ((int)(calculatedPosition.x / 5) % 2) == 0)
                         {
-                            lightAmmount = 100;
+                            //lightAmmount = 100;
                         }
                     }
 

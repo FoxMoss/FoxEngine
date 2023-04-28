@@ -12,7 +12,8 @@
         "raylib.h": "c",
         "raymath.h": "c",
         "camera.h": "c",
-        "upscale.h": "c"
+        "upscale.h": "c",
+        "*.m": "c"
     },
     "makefile.launchConfigurations": [
         {

@@ -34,7 +34,7 @@ var Module = typeof Module != 'undefined' ? Module : {};
         // web worker
         PACKAGE_PATH = encodeURIComponent(location.pathname.toString().substring(0, location.pathname.toString().lastIndexOf('/')) + '/');
       }
-      var PACKAGE_NAME = 'foxengine.data';
+      var PACKAGE_NAME = './build/foxengine.data';
       var REMOTE_PACKAGE_BASE = 'foxengine.data';
       if (typeof Module['locateFilePackage'] === 'function' && !Module['locateFile']) {
         Module['locateFile'] = Module['locateFilePackage'];
@@ -166,10 +166,10 @@ Module['FS_createPath']("/", "resources", true, true);
           var files = metadata['files'];
           for (var i = 0; i < files.length; ++i) {
             DataRequest.prototype.requests[files[i].filename].onload();
-          }          Module['removeRunDependency']('datafile_foxengine.data');
+          }          Module['removeRunDependency']('datafile_./build/foxengine.data');
 
       };
-      Module['addRunDependency']('datafile_foxengine.data');
+      Module['addRunDependency']('datafile_./build/foxengine.data');
 
       if (!Module.preloadResults) Module.preloadResults = {};
 

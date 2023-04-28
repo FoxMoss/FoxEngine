@@ -8,7 +8,7 @@
 #endif
 
 FoxCamera camera;
-int step = 0;
+int step = 4;
 
 Vector3 newPos;
 Texture2D torus;
@@ -22,11 +22,11 @@ Image imageBuffer;
 Image stars;
 Texture2D starsTexture;
 
-
 Texture displayTexture;
 Font hackfont;
+Music music;
 
-SDFLevel* levels;
+SDFLevel *levels;
 int main(void)
 {
     // return 0;
@@ -34,13 +34,11 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "[foxmoss]");
 
-
     // Images:
     Image image = LoadImage("resources/torus.png");
     torus = LoadTextureFromImage(image);
     UnloadImage(image);
     hackfont = LoadFont("resources/hack.ttf");
-
 
     levels = initLevels();
 
@@ -50,30 +48,30 @@ int main(void)
     {
         for (int x = 0; x < screenWidth; x++)
         {
-            if(rand() % 100 == 0)
+            if (rand() % 100 == 0)
             {
                 ImageDrawPixel(&stars, x, y, WHITE);
             }
         }
-        
     }
     ImageBlurGaussian(&stars, 1);
 
     starsTexture = LoadTextureFromImage(stars);
-    
+
     displayTexture = LoadTextureFromImage(imageBuffer);
     DisableCursor();
 
-    //level1 = InitLevels();
+    InitAudioDevice();
+    music = LoadMusicStream("resources/desertcave.mp3");
+    PlayMusicStream(music);
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
-    SetTargetFPS(30); // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
+    SetTargetFPS(30);
 
-    // Main game loop
-    while (!WindowShouldClose()) // Detect window close button or ESC key
+
+    while (!WindowShouldClose())
     {
         UpdateDrawFrame();
     }
@@ -82,6 +80,9 @@ int main(void)
     UnloadTexture(displayTexture);
     UnloadImage(imageBuffer);
     UnloadTexture(torus);
+    UnloadMusicStream(music);
+
+    CloseAudioDevice();
     CloseWindow();
 
     return 0;
@@ -117,8 +118,15 @@ void gameSequence(SDFLevel level)
         newPos.x += 0.3;
     }
     Vector2 mouseDelta = GetMouseDelta();
+    /*if (newPos.x == 0 && newPos.y == 0 && newPos.z == 0 && mouseDelta.x == 0 && mouseDelta.y == 0)
+    {
+
+        DrawTexture(displayTexture, 0, 0, WHITE);
+        return;
+    }*/
     camera.rotation.y -= mouseDelta.x / 1000;
     camera.rotation.x += mouseDelta.y / 1000;
+
     newPos = rotVec3(newPos, axisY, camera.rotation.y);
     newPos = addVec3(newPos, camera.position);
 
@@ -133,12 +141,12 @@ void gameSequence(SDFLevel level)
     if (cameraDist.dist < 0.3)
     {
         Vector3 normal = (Vector3){
-            (smallestDist(addVec3(newPos, (Vector3){0.0001, 0, 0}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0.01, 0, 0}), camera, level).dist),
-            (smallestDist(addVec3(newPos, (Vector3){0, 0.0001, 0}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0, 0.01, 0}), camera, level).dist),
-            (smallestDist(addVec3(newPos, (Vector3){0, 0, 0.0001}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0, 0, 0.01}), camera, level).dist)};
+            (smallestDist(addVec3(newPos, (Vector3){0.0001, 0, 0}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0.0001, 0, 0}), camera, level).dist),
+            (smallestDist(addVec3(newPos, (Vector3){0, 0.0001, 0}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0, 0.0001, 0}), camera, level).dist),
+            (smallestDist(addVec3(newPos, (Vector3){0, 0, 0.0001}), camera, level).dist - smallestDist(subVec3(newPos, (Vector3){0, 0, 0.0001}), camera, level).dist)};
 
         normalize(&normal);
-        normal = mulVec3(normal, 0.3);
+        normal = mulVec3(normal, -cameraDist.dist + 0.3);
         normal.y = 0;
 
         newPos = addVec3(newPos, normal);
@@ -180,17 +188,45 @@ void gameSequence(SDFLevel level)
     // cameraDist = smallestDist(camera.position, camera, level1);
 
     render(&camera, imageBuffer, level);
-    //upscaleImage(&imageBuffer, 75, 12);
+    //upscaleImage(&imageBuffer, 18);
     UpdateTexture(displayTexture, imageBuffer.data);
 
     DrawTexture(displayTexture, 0, 0, WHITE);
 
-    DrawFPS(10, 10);
 }
 
 void sequenceStart()
 {
+    switch (step)
+    {
+    case 0:
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            step++;
 
+            NewFoxCamera(&camera);
+        }
+        break;
+    case 1:
+        break;
+    case 2:
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            step++;
+
+            NewFoxCamera(&camera);
+        }
+        break;
+    case 3:
+        break;
+
+    default:
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            step = 0;
+        }
+        break;
+    }
     BeginDrawing();
 
     ClearBackground(BLACK);
@@ -202,30 +238,34 @@ void sequenceStart()
         DrawTextEx(hackfont, "ENTER THE ", (Vector2){300, 155}, 50, 10, RED);
         DrawTextEx(hackfont, "(space to begin)", (Vector2){300, 600}, 30, 5, GRAY);
         DrawTexture(torus, 340, 270, WHITE);
-        if (IsKeyPressed(KEY_SPACE))
-        {
-            step++;
-
-            NewFoxCamera(&camera);
-        }
         break;
     case 1:
         gameSequence(levels[0]);
+        break;
+    case 2:
+        DrawTextEx(hackfont, "ALL SPACE AND TIME\nCONFORM TO TAMPERING\nOF THE [DOUGHNUT] ", (Vector2){100, 100}, 50, 10, RED);
+
+        DrawTextEx(hackfont, "(space to continue)", (Vector2){300, 600}, 30, 5, GRAY);
+        break;
+    case 3:
+        gameSequence(levels[1]);
+        break;
+    
+    case 4:
+        gameSequence(levels[2]);
         break;
 
     default:
         DrawTextEx(hackfont, "END DEMO", (Vector2){300, 155}, 50, 10, RED);
         DrawTextEx(hackfont, "(space to reset)", (Vector2){300, 600}, 30, 5, GRAY);
-        if (IsKeyPressed(KEY_SPACE))
-        {
-            step = 0;
-        }
         break;
     }
 
+    DrawFPS(10, 10);
     EndDrawing();
 }
 void UpdateDrawFrame(void)
 {
+    UpdateMusicStream(music);
     sequenceStart();
 }

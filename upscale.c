@@ -1,43 +1,85 @@
 #include "upscale.h"
 #include "math.h"
 
-void upscaleImage(Image *buffer, int size, int upscale)
+void upscaleImage(Image *buffer, int size)
 {
     Image newBuffer = GenImageColor(buffer->width, buffer->height, BLACK);
 
-    for (int y = 0; y < buffer->height; y++)
+    for (int y = 0; y < buffer->height / size; y++)
     {
-        for (int x = 0; x < buffer->width; x++)
+        for (int x = 0; x < buffer->width / size; x++)
         {
-            Color newColor;
-            float rpixelx = round(x/upscale)*upscale;
-            float rpixely = round(y/upscale)*upscale;
-            //printf("%i, %i\n", x, y);
-            float distx = (x - rpixelx + 1)/upscale;
-            float disty = (y - rpixely + 1)/upscale;
-            if(rpixelx == -1)
-            {
-                //printf("%f\n", rpixelx);
-            }
-            //printf("%f, %f\n", distx, disty);
-            Color color1 = GetImageColor(*buffer, rpixelx, rpixely);
-            Color color2 = GetImageColor(*buffer, fmax(rpixelx+upscale, buffer->width), rpixely+0);
-            Color color3 = GetImageColor(*buffer, fmin(rpixelx-upscale, 0), fmin(rpixely+0,0));
-            Color color4 = GetImageColor(*buffer, fmin(rpixelx+0,0), fmax(rpixely+upscale, buffer->height));
-            Color color5 = GetImageColor(*buffer, fmin(rpixelx+0,0), fmin(rpixely-upscale, 0));
-            float newRed = (color1.r + color2.r*distx + color3.r*distx + color4.r*disty + color5.r*disty)/(1+(distx*2)+(disty*2));
+            Color A, B, C, D, E, F, G, H, I;
+            Color E0, E1, E2, E3, E4, E5, E6, E7, E8;
+            A = GetImageColorSafe(buffer, x*size - size, y*size - size);
+            B = GetImageColorSafe(buffer, x*size, y*size - size);
+            C = GetImageColorSafe(buffer, x*size + size, y*size - size);
+            D = GetImageColorSafe(buffer, x*size - size, y*size);
+            E = GetImageColorSafe(buffer, x*size, y*size);
+            F = GetImageColorSafe(buffer, x*size + size, y*size);
+            G = GetImageColorSafe(buffer, x*size - size, y*size + size);
+            I = GetImageColorSafe(buffer, x*size + size, y*size + size);
+            H = GetImageColorSafe(buffer, x*size, y*size + size);
 
-            newColor = (Color){newRed, 0, 0, 255};
-            ImageDrawPixel(&newBuffer, x, y, newColor);
-            //ImageDrawRectangle(buffer, x*upscale, y*upscale, upscale/2, upscale/2, GetImageColor(*buffer, x, y));
+            if (!coloreqeq(B, H) && !coloreqeq(D, F))
+            {
+                E0 = coloreqeq(D, B) ? D : E;
+                E1 = (coloreqeq(D, B) && !coloreqeq(E, C)) || (coloreqeq(B, F) && !coloreqeq(E, A)) ? B : E;
+                E2 = coloreqeq(B, F) ? F : E;
+                E3 = (coloreqeq(D, B) && !coloreqeq(E, G)) || (coloreqeq(D, H) && !coloreqeq(E, A)) ? D : E;
+                E4 = E;
+                E5 = (coloreqeq(B, F) && !coloreqeq(E, I)) || (coloreqeq(H, F) && !coloreqeq(E, C)) ? F : E;
+                E6 = coloreqeq(D, H) ? D : E;
+                E7 = (coloreqeq(D, H) && !coloreqeq(E, I)) || (coloreqeq(H, F) && !coloreqeq(E, G)) ? H : E;
+                E8 = coloreqeq(H, F) ? F : E;
+            }
+            else
+            {
+                E0 = E;
+                E1 = E;
+                E2 = E;
+                E3 = E;
+                E4 = E;
+                E5 = E;
+                E6 = E;
+                E7 = E;
+                E8 = E;
+            }
+            ImageDrawRectangle(&newBuffer, x*size - size/3, y*size - size/3, size/3, size/3, E0);
+            ImageDrawRectangle(&newBuffer, x*size + size/3, y*size - size/3, size/3, size/3, E2);
+            ImageDrawRectangle(&newBuffer, x*size, y*size - size/3, size/3, size/3, E1);
+            ImageDrawRectangle(&newBuffer, x*size - size/3, y*size, size/3, size/3, E3);
+            ImageDrawRectangle(&newBuffer, x*size + size/3, y*size, size/3, size/3, E5);
+            ImageDrawRectangle(&newBuffer, x*size, y*size, size/3, size/3, E4);
+            ImageDrawRectangle(&newBuffer, x*size - size/3, y*size + size/3, size/3, size/3, E6);
+            ImageDrawRectangle(&newBuffer, x*size + size/3, y*size + size/3, size/3, size/3, E8);
+            ImageDrawRectangle(&newBuffer, x*size, y*size + size/3, size/3, size/3, E7);
+
+            // ImageDrawRectangle(buffer, x*size*upscale, y*size*upscale, upscale/2, upscale/2, GetImageColorSafe(buffer, x*size, y*size));
         }
     }
-    //ImageBlurBox(buffer, upscale);
+    // ImageBlurBox(buffer, upscale);
 
     //UnloadImage(newBuffer);
     UnloadImage(*buffer);
-    *buffer = ImageCopy(newBuffer);
-    //ImageDraw(buffer, newBuffer, (Rectangle){buffer->width, buffer->height}, (Rectangle){buffer->width, buffer->height}, BLACK);
+    *buffer = newBuffer;
+    // ImageDraw(buffer, newBuffer, (Rectangle){buffer->width, buffer->height}, (Rectangle){buffer->width, buffer->height}, BLACK);
     UnloadImage(newBuffer);
 }
 
+bool coloreqeq(Color x, Color y)
+{
+    return (x.r == y.r) && (x.g == y.g) && (x.b == y.b);
+}
+Color GetImageColorSafe(Image *image, int x, int y)
+{
+    int width = image->width;
+    int height = image->height;
+
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return BLACK;
+    }
+
+    return GetImageColor(*image, x, y);
+
+}

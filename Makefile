@@ -31,7 +31,7 @@ PLATFORM              ?= PLATFORM_DESKTOP
 # Define project variables
 PROJECT_NAME          ?= foxengine
 PROJECT_VERSION       ?= 1.0
-PROJECT_BUILD_PATH    ?= .
+PROJECT_BUILD_PATH    ?= ./build/
 
 RAYLIB_PATH           ?= ../raylib
 
@@ -404,7 +404,7 @@ all:
 
 # Project target defined by PROJECT_NAME
 $(PROJECT_NAME): $(OBJS)
-	$(CC) -o $(PROJECT_NAME)$(EXT) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
+	$(CC) -o $(PROJECT_BUILD_PATH)$(PROJECT_NAME)$(EXT) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
 
 # Compile source files
 # NOTE: This pattern will compile every module defined on $(OBJS)
