@@ -28,6 +28,7 @@ typedef struct FoxCamera
     float fov;
     float aspectratio;
     float angle;
+    int maxDist;
 } FoxCamera;
 
 void NewFoxCamera(FoxCamera *cam);

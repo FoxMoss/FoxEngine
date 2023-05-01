@@ -66,7 +66,7 @@ int main(void)
     PlayMusicStream(music);
 
 #if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+    emscripten_set_main_loop(UpdateDrawFrame, 30, 1);
 #else
     SetTargetFPS(30);
 
@@ -220,6 +220,18 @@ void sequenceStart()
     case 3:
         break;
 
+    case 4:
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            step++;
+
+            NewFoxCamera(&camera);
+        }
+        break;
+
+    case 5:
+        break;
+
     default:
         if (IsKeyPressed(KEY_SPACE))
         {
@@ -243,7 +255,7 @@ void sequenceStart()
         gameSequence(levels[0]);
         break;
     case 2:
-        DrawTextEx(hackfont, "ALL SPACE AND TIME\nCONFORM TO TAMPERING\nOF THE [DOUGHNUT] ", (Vector2){100, 100}, 50, 10, RED);
+        DrawTextEx(hackfont, "ALL SPACE AND TIME\nCONFORM TO TAMPERING\nOF THE [DOUGHNUT]", (Vector2){100, 100}, 50, 10, RED);
 
         DrawTextEx(hackfont, "(space to continue)", (Vector2){300, 600}, 30, 5, GRAY);
         break;
@@ -252,6 +264,12 @@ void sequenceStart()
         break;
     
     case 4:
+        DrawTextEx(hackfont, "THE [DOUGHNUT] DOES\nNOT LIKE YOU >:(", (Vector2){100, 100}, 50, 10, RED);
+        DrawTextEx(hackfont, "[cube] is friend tho :P\nhave some [cube]", (Vector2){100, 250}, 40, 10, BLUE);
+
+        DrawTextEx(hackfont, "(space to continue)", (Vector2){300, 600}, 30, 5, GRAY);
+        break;
+    case 5:
         gameSequence(levels[2]);
         break;
 

@@ -9,7 +9,8 @@ typedef enum SDFType
     SDF_PLANE = 1,
     SDF_BOX = 2,
     SDF_TORUS = 3,
-    SDF_MANDELBULB = 4
+    SDF_MANDELBULB = 4,
+    SDF_WALL = 5
 } SDFType;
 typedef struct rayModifer
 {
@@ -42,6 +43,7 @@ typedef struct SDFReturn
 float boxcheapSDF(Vector3 point, Vector3 center, Vector3 scale);
 float sphereSDF(Vector3 point, Vector3 sphere, float radius);
 float planeSDF(Vector3 point, float y);
+float wallInfSDF(Vector3 point, float x);
 float torusSDF(Vector3 point, Vector3 postion, Vector2 size);
 float mandelbulbSDF(Vector3 pos, Vector3 position);
 

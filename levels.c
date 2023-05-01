@@ -22,11 +22,11 @@ SDFLevel *initLevels() {
 
     SDFObject *objects3 = malloc(sizeof(SDFObject) * 5);
 
-    objects3[0] = (SDFObject) {SDF_PLANE, {2, 0, 10}, WHITE, {0, 0, 0}, (rayModifer){true, (Vector3){-4,9,0}, (Vector3){0,0,0}, 1}, false};
-    objects3[2] = (SDFObject) {SDF_PLANE, {2, 10, 10}, WHITE, {0, 0, 0}, (rayModifer){true, (Vector3){4,-9,0}, (Vector3){0,0,0}, 1}, false};
+    objects3[0] = (SDFObject) {SDF_BOX, {0, 4, 8}, WHITE, {5, 5, 1}, (rayModifer){true, (Vector3){0,0,-6}, (Vector3){0,0,0}, 1}, false};
+    objects3[3] = (SDFObject) {SDF_BOX, {0, 4, 4}, BLUE, {1, 1, 1}, (rayModifer){false, (Vector3){4,-9,0}, (Vector3){0,0,0}, 1}, false};
     //objects2[0] = (SDFObject) {SDF_MANDELBULB, {0, 5, 5}, RED, {0, 0, 0}, (rayModifer){false}, false};
     //objects[1] = (SDFObject) {SDF_BOX, {8, 4, 10}, BLUE, {2, 2, 2}, (rayModifer){true, {0, 5, 0}, {0, 0, 0}, 1}, false};
-    objects3[3] = (SDFObject) {SDF_TORUS, {0, 5, 10}, RED, {2, 1, 2}, (rayModifer) { false }, false};
+    objects3[2] = (SDFObject) {SDF_TORUS, {0, 5, 10}, RED, {2, 1, 2}, (rayModifer) { false }, false};
     objects3[1] = (SDFObject) {SDF_TORUS, {0, 5, 10}, BLANK, {1, 1, 2}, (rayModifer) { true, (Vector3){0,0,0}, (Vector3){0,0,0}, 1}, true};
     //objects3[3] = (SDFObject) {SDF_BOX, {0, 5, 11}, RED, {1, 1, 1}, (rayModifer) { true, (Vector3){0,-4,-4}, (Vector3){0,0,0}, 1}, false};
 

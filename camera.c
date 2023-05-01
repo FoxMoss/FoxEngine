@@ -9,30 +9,23 @@ void NewFoxCamera(FoxCamera *cam)
     cam->fov = 90;
     cam->aspectratio = WIDTH / (float)HEIGHT;
     cam->angle = tan(PI * 0.5 * cam->fov / 180.);
+    cam->maxDist = 10;
     // this->*framebuffer = malloc(camera.width * camera.height * sizeof(Vector3));
 }
 
 SDFReturn smallestDist(Vector3 point, FoxCamera camera, SDFLevel level)
 {
 
-    /*SDFObject objects[3] = {{SDF_PLANE, {2, 0, 10}, WHITE, {0, 0, 0}, (rayModifer){false}, false},
-                            {SDF_BOX, {9, 4, 10}, BLUE, 5, (rayModifer){false, {-5, 0, 0}, {0, 0, 0}}},
-                            {SDF_TORUS, {0, 4, 10}, RED, {3, 0.1, 1}, (rayModifer){false}, false},
-                            {SDF_SPHERE, {0, 4, 10}, BLUE, {3, 2, 1}, (rayModifer){false, (Vector3){0, 0, 0}, (Vector3){0, 0, 0}, 1}, true, true}};
-*/
     float smallest = INFINITY;
     SDFObject object = level.objects[0];
     SDFObject rayEffect = level.objects[0];
     float effectDist = INFINITY;
-
-    //printf("\n%b\n", level[1][5]);
 
     float lastSmallest = INFINITY;
 
     for (int i = 0; i < level.size; i++)
     {
         lastSmallest = smallest;
-        // Vector3 calculatedPosition = objects[i].postion;
         switch (level.objects[i].type)
         {
         case SDF_SPHERE:
@@ -173,7 +166,7 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
 
                         // Vector3 pos = absVec3(addVec3(mulVec3(raydir, dist), camera.position));
 
-                        lightAmmount = fmin(fmax((-dotVec3(normal, (Vector3){-1, -1, 0}) + 0.5) * 255 / 2, 0) + 50, 255);
+                        lightAmmount = fmin(fmax((-dotVec3(normal, (Vector3){-1, -1, 0}) + 0.5) * 255 / 2, 0) + 100, 255);
                         // printf("%f\n", lightAmmount);
                     }
                     else
@@ -183,6 +176,7 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                             //lightAmmount = 100;
                         }
                     }
+                    lightAmmount *= fmax(fmax(255-fmax(dist/camera.maxDist*255-100, 0), -255)/255, 0);
 
                     color = (Color){smallestDistData.object.color.r*lightAmmount/255, smallestDistData.object.color.g*lightAmmount/255, smallestDistData.object.color.b*lightAmmount/255, 255};
                     break;
@@ -190,6 +184,11 @@ void render(FoxCamera *cameraP, Image imageBuffer, SDFLevel level)
                 else if (distAdd < 1 && smallestDistData.object.type != SDF_PLANE)
                 {
                     steps += 1;
+                }
+                else if(dist > camera.maxDist)
+                {
+                    steps = k;
+                    break;
                 }
             }
             // ImageDrawRectangle(&imageBuffer, x * SCALEUP, y * SCALEUP, SCALEUP, SCALEUP, (Color) {k, k, k, 255});
